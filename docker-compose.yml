@@ -1,0 +1,61 @@
+version: '3.5'
+
+services:
+  nginx-laravel-test:
+    container_name: nginx-laravel-test
+    image: nginx:1.22
+    restart: "no"
+    ports:
+      - "82:80"
+    volumes:
+      - .:/var/www/
+      - ./.docker/config/nginx/:/etc/nginx/conf.d/
+      - ./.docker/logs/nginx:/var/log/nginx/
+    networks:
+      - web-network-laravel-test
+
+  php-laravel-test:
+    build:
+      context: ./.docker
+    container_name: php-laravel-test
+    restart: "no"
+    working_dir: /var/www
+    volumes:
+      - .:/var/www/
+    networks:
+      - web-network-laravel-test
+
+  mysql-laravel-test:
+    container_name: mysql-laravel-test
+    image: mysql:latest
+    restart: "no"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./logs/mysql/:/var/logs/mysql
+      - db-laravel-test:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      MYSQL_ROOT_PASSWORD: local
+      MYSQL_DATABASE: laravel-test
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    networks:
+      - web-network-laravel-test
+
+  redis-laravel-test:
+    container_name: redis-laravel-test
+    image: redis:7.0.5
+    ports:
+      - "6380:6379"
+    networks:
+      - web-network-laravel-test
+
+volumes:
+    db-laravel-test:
+        name: db-laravel-test
+
+networks:
+  web-network-laravel-test:
+    driver: bridge
