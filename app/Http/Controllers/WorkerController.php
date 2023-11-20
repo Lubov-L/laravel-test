@@ -2,14 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Worker\FilterRequest;
 use App\Http\Requests\Worker\StoreRequest;
+use App\Http\Requests\Worker\UpdateRequest;
 use App\Models\Worker;
 
 class WorkerController extends Controller
 {
-    public function index()
+    public function index(FilterRequest $request)
     {
-        $workers = Worker::all();
+        $data = $request->validated();
+
+        $workerQuery = Worker::query();
+
+        if (isset($data['name'])) {
+            $workerQuery->where('name', 'like', "%{$data['name']}%");
+        }
+
+        if (isset($data['surname'])) {
+            $workerQuery->where('surname', 'like', "%{$data['surname']}%");
+        }
+
+        if (isset($data['email'])) {
+            $workerQuery->where('email', 'like', "%{$data['email']}%");
+        }
+
+        if (isset($data['from'])) {
+            $workerQuery->where('age', '>', $data['from']);
+        }
+
+        if (isset($data['to'])) {
+            $workerQuery->where('age', '<', $data['to']);
+        }
+
+        if (isset($data['description'])) {
+            $workerQuery->where('description', 'like', "%{$data['description']}%");
+        }
+
+        if (isset($data['is_married'])) {
+            $workerQuery->where('is_married', true);
+        }
+
+        $workers = $workerQuery->paginate(3);
 
         return view('worker.index', compact('workers'));
     }
@@ -30,28 +64,31 @@ class WorkerController extends Controller
 
         $data['is_married'] = isset($data['is_married']);
 
-        Worker::create($data);
+        Worker::query()->create($data);
 
         return redirect()->route('worker.index');
     }
 
-    public function update()
+    public function edit(Worker $worker)
     {
-        $worker = Worker::find(2);
-
-        $worker->update([
-            'name' => 'Karla'
-        ]);
-
-        return "Was updated";
+        return view('worker.edit', compact('worker'));
     }
 
-    public function delete()
+    public function update(UpdateRequest $request, Worker $worker)
     {
-        $worker = Worker::find(2);
+        $data = $request->validated();
 
+        $data['is_married'] = isset($data['is_married']);
+
+        $worker->update($data);
+
+        return redirect()->route('worker.show', $worker->id);
+    }
+
+    public function delete(Worker $worker)
+    {
         $worker->delete();
 
-        return 'Worker was deleted';
+        return redirect()->route('worker.index');
     }
 }

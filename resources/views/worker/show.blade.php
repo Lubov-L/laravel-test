@@ -1,5 +1,7 @@
-<body>
-Index page
+@extends('layout.main')
+
+@section('content')
+    
 <div>
     <hr>
         <div>
@@ -15,5 +17,5 @@ Index page
         </div>
         <hr>
 </div>
-</body>
-</html>
+
+@endsection
