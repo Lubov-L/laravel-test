@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Profile extends Model
+class Position extends Model
 {
     use HasFactory;
 
     protected $guarded = false;
 
-    public function worker(): BelongsTo
+    public function workers()
     {
-        return $this->belongsTo(Worker::class, 'worker_id', 'id');
+        return $this->hasMany(Worker::class, 'position_id', 'id');
     }
 }
